@@ -1,5 +1,5 @@
 // ==========================================
-// OMNIX CORE v34.0 (Puter.js AI + Partner Features)
+// OMNIX CORE v35.0 (Puter.js AI + No Captcha)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -9,8 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const LOGO_URL = 'logo.png';
-    const HCAPTCHA_SITE_KEY = 'c94227d8-1ad4-4ca2-97ac-063c996e7dc6';
-    let captchaWidgetId = null; 
     let realtimeChannel = null;
     let tourStep = 0;
 
@@ -305,15 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // SPLIT SCREEN LOGIN VIEW
     // ==========================================
     function renderLogin() {
-      return `<div class="login-shell"><div class="viz-side"><div class="viz-grid"></div><div class="viz-header"><div class="viz-status">SYSTEM ONLINE</div><div class="viz-time" id="vizTime">00:00:00 UTC</div></div><div class="flow-container"><svg class="flow-svg" viewBox="0 0 500 500"><line x1="250" y1="250" x2="250" y2="100" class="flow-line-active" /><line x1="250" y1="250" x2="400" y2="250" class="flow-line-active" /><line x1="250" y1="250" x2="250" y2="400" class="flow-line-active" /><line x1="250" y1="250" x2="100" y2="250" class="flow-line-active" /></svg><div class="ai-core"><div class="ai-core-text">OMNIX<br>CORE</div></div><div class="flow-node node-pos-1"><div class="flow-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><div class="flow-node-title">1. Define Mission</div><div class="flow-node-desc">Input business parameters</div></div><div class="flow-node node-pos-2"><div class="flow-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m17.4-6.4l-4.2 4.2m-6.4 6.4l-4.2 4.2m0-14.8l4.2 4.2m6.4 6.4l4.2 4.2"/></svg></div><div class="flow-node-title">2. AI Reacts</div><div class="flow-node-desc">Extracts Mission DNA</div></div><div class="flow-node node-pos-3"><div class="flow-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="flow-node-title">3. Execution</div><div class="flow-node-desc">Digital workers deployed</div></div><div class="flow-node node-pos-4"><div class="flow-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="flow-node-title">4. Plan Done</div><div class="flow-node-desc">Verification & reporting</div></div></div></div><div class="login-side"><div class="login-form-box"><div class="login-brand"><div class="brand-mark"><img src="${LOGO_URL}" alt="OMNIX Logo" onerror="this.style.display='none'"></div><div class="brand-name">OMNIX</div><div class="login-desc">Next-Generation Intelligent Mission Management. Plan, execute, and verify complex objectives with an autonomous digital workforce.</div></div><div class="eyebrow">SECURE ACCESS // PROTOCOL 7.2</div><form id="auth-form"><div class="field"><label class="field-label">Email Address</label><input type="email" id="login-email" class="field-input" placeholder="you@example.com" required></div><div class="field"><label class="field-label">Password</label><input type="password" id="login-pass" class="field-input" placeholder="••••••••" required></div><div class="field" id="login-pass-confirm-field" style="display: none;"><label class="field-label">Confirm Password</label><input type="password" id="login-pass-confirm" class="field-input" placeholder="••••••••"></div><div class="field" id="login-phone-field" style="display: none;"><label class="field-label">Phone Number (Optional)</label><div class="phone-input-group"><select id="login-country" class="field-input"><option value="+92" data-flag="🇵🇰">🇵🇰 +92</option><option value="+1" data-flag="🇺🇸">🇺🇸 +1</option><option value="+44" data-flag="🇬🇧">🇬🇧 +44</option><option value="+91" data-flag="🇮🇳">🇮🇳 +91</option><option value="+971" data-flag="🇦🇪">🇦🇪 +971</option><option value="+61" data-flag="🇦🇺">🇦🇺 +61</option></select><input type="tel" id="login-phone" class="field-input" placeholder="300 1234567"></div></div><button type="submit" class="btn-primary" id="submit-btn"><span class="spinner"></span><span class="btn-text">Sign In</span></button></form><div style="display: flex; align-items: flex-start; gap: 10px; margin-top: 20px; margin-bottom: 10px;"><input type="checkbox" id="terms-check" style="margin-top: 4px; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;"><label for="terms-check" style="font-size: 12.5px; color: var(--text-dim); cursor: pointer; line-height: 1.5;">I have read and agree to the <a onclick="openTermsModal()" style="color: var(--accent); text-decoration: none; font-weight: 600; cursor: pointer;">Terms of Service and Privacy Policy</a>.</label></div><div id="hcaptcha-container" class="h-captcha"></div><div class="auth-toggle"><span id="toggle-text">Don't have an account?</span> <a id="toggle-link">Sign Up</a></div><div class="auth-divider">OR</div><button class="btn-google" id="google-login-btn"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg><span class="btn-text">Sign in with Google</span></button></div></div></div>`;
-    }
-
-    function initHcaptcha() {
-      const hcaptchaContainer = document.getElementById('hcaptcha-container');
-      if (hcaptchaContainer && hcaptchaContainer.childElementCount === 0) {
-        if (typeof hcaptcha !== 'undefined' && hcaptcha.render) captchaWidgetId = hcaptcha.render('hcaptcha-container', { sitekey: HCAPTCHA_SITE_KEY, theme: 'dark' });
-        else setTimeout(initHcaptcha, 100);
-      }
+      return `<div class="login-shell"><div class="viz-side"><div class="viz-grid"></div><div class="viz-header"><div class="viz-status">SYSTEM ONLINE</div><div class="viz-time" id="vizTime">00:00:00 UTC</div></div><div class="flow-container"><svg class="flow-svg" viewBox="0 0 500 500"><line x1="250" y1="250" x2="250" y2="100" class="flow-line-active" /><line x1="250" y1="250" x2="400" y2="250" class="flow-line-active" /><line x1="250" y1="250" x2="250" y2="400" class="flow-line-active" /><line x1="250" y1="250" x2="100" y2="250" class="flow-line-active" /></svg><div class="ai-core"><div class="ai-core-text">OMNIX<br>CORE</div></div><div class="flow-node node-pos-1"><div class="flow-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><div class="flow-node-title">1. Define Mission</div><div class="flow-node-desc">Input business parameters</div></div><div class="flow-node node-pos-2"><div class="flow-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m17.4-6.4l-4.2 4.2m-6.4 6.4l-4.2 4.2m0-14.8l4.2 4.2m6.4 6.4l4.2 4.2"/></svg></div><div class="flow-node-title">2. AI Reacts</div><div class="flow-node-desc">Extracts Mission DNA</div></div><div class="flow-node node-pos-3"><div class="flow-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="flow-node-title">3. Execution</div><div class="flow-node-desc">Digital workers deployed</div></div><div class="flow-node node-pos-4"><div class="flow-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="flow-node-title">4. Plan Done</div><div class="flow-node-desc">Verification & reporting</div></div></div></div><div class="login-side"><div class="login-form-box"><div class="login-brand"><div class="brand-mark"><img src="${LOGO_URL}" alt="OMNIX Logo" onerror="this.style.display='none'"></div><div class="brand-name">OMNIX</div><div class="login-desc">Next-Generation Intelligent Mission Management. Plan, execute, and verify complex objectives with an autonomous digital workforce.</div></div><div class="eyebrow">SECURE ACCESS // PROTOCOL 7.2</div><form id="auth-form"><div class="field"><label class="field-label">Email Address</label><input type="email" id="login-email" class="field-input" placeholder="you@example.com" required></div><div class="field"><label class="field-label">Password</label><input type="password" id="login-pass" class="field-input" placeholder="••••••••" required></div><div class="field" id="login-pass-confirm-field" style="display: none;"><label class="field-label">Confirm Password</label><input type="password" id="login-pass-confirm" class="field-input" placeholder="••••••••"></div><div class="field" id="login-phone-field" style="display: none;"><label class="field-label">Phone Number (Optional)</label><div class="phone-input-group"><select id="login-country" class="field-input"><option value="+92" data-flag="🇵🇰">🇵🇰 +92</option><option value="+1" data-flag="🇺🇸">🇺🇸 +1</option><option value="+44" data-flag="🇬🇧">🇬🇧 +44</option><option value="+91" data-flag="🇮🇳">🇮🇳 +91</option><option value="+971" data-flag="🇦🇪">🇦🇪 +971</option><option value="+61" data-flag="🇦🇺">🇦🇺 +61</option></select><input type="tel" id="login-phone" class="field-input" placeholder="300 1234567"></div></div><button type="submit" class="btn-primary" id="submit-btn"><span class="spinner"></span><span class="btn-text">Sign In</span></button></form><div style="display: flex; align-items: flex-start; gap: 10px; margin-top: 20px; margin-bottom: 10px;"><input type="checkbox" id="terms-check" style="margin-top: 4px; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;"><label for="terms-check" style="font-size: 12.5px; color: var(--text-dim); cursor: pointer; line-height: 1.5;">I have read and agree to the <a onclick="openTermsModal()" style="color: var(--accent); text-decoration: none; font-weight: 600; cursor: pointer;">Terms of Service and Privacy Policy</a>.</label></div><div class="auth-toggle"><span id="toggle-text">Don't have an account?</span> <a id="toggle-link">Sign Up</a></div><div class="auth-divider">OR</div><button class="btn-google" id="google-login-btn"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg><span class="btn-text">Sign in with Google</span></button></div></div></div>`;
     }
 
     function attachLoginEvents() {
@@ -323,32 +313,27 @@ document.addEventListener('DOMContentLoaded', () => {
           e.preventDefault(); isLoginMode = !isLoginMode;
           if (isLoginMode) { submitBtn.querySelector('.btn-text').textContent = 'Sign In'; toggleText.textContent = "Don't have an account?"; toggleLink.textContent = 'Sign Up'; confirmField.style.display = 'none'; phoneField.style.display = 'none'; } 
           else { submitBtn.querySelector('.btn-text').textContent = 'Create Account'; toggleText.textContent = "Already have an account?"; toggleLink.textContent = 'Sign In'; confirmField.style.display = 'block'; phoneField.style.display = 'block'; }
-          if (captchaWidgetId !== null && typeof hcaptcha !== 'undefined') hcaptcha.reset(captchaWidgetId);
         };
       }
-      initHcaptcha();
       const authForm = document.getElementById('auth-form');
       if (authForm) {
         authForm.onsubmit = async (e) => {
           e.preventDefault();
           const termsCheck = document.getElementById('terms-check');
           if (!termsCheck || !termsCheck.checked) { showToast('You must agree to the Terms of Service to continue.', 'error'); return; }
-          let captchaToken = null;
-          if (captchaWidgetId !== null && typeof hcaptcha !== 'undefined') captchaToken = hcaptcha.getResponse(captchaWidgetId);
-          if (!captchaToken) { showToast('Please complete the security check.', 'error'); return; }
           const email = document.getElementById('login-email').value; const password = document.getElementById('login-pass').value;
           submitBtn.classList.add('loading');
           try {
-            if (isLoginMode) { const { data, error } = await sb.auth.signInWithPassword({ email, password, options: { captchaToken } }); if (error) throw error; } 
+            if (isLoginMode) { const { data, error } = await sb.auth.signInWithPassword({ email, password }); if (error) throw error; } 
             else {
               const confirmPassword = document.getElementById('login-pass-confirm').value;
-              if (password !== confirmPassword) { showToast('Passwords do not match', 'error'); submitBtn.classList.remove('loading'); if (captchaWidgetId !== null && typeof hcaptcha !== 'undefined') hcaptcha.reset(captchaWidgetId); return; }
+              if (password !== confirmPassword) { showToast('Passwords do not match', 'error'); submitBtn.classList.remove('loading'); return; }
               const phoneCountry = document.getElementById('login-country').value; const phoneNumber = document.getElementById('login-phone').value; const fullPhone = phoneNumber ? `${phoneCountry} ${phoneNumber}` : '';
-              const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: email.split('@')[0], phone: fullPhone }, captchaToken } });
+              const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: email.split('@')[0], phone: fullPhone } } });
               if (error) throw error;
-              if (data.user && !data.session) { showToast('Account created! Check your email for the verification link to log in.', 'success'); isLoginMode = true; submitBtn.querySelector('.btn-text').textContent = 'Sign In'; toggleText.textContent = "Don't have an account?"; toggleLink.textContent = 'Sign Up'; confirmField.style.display = 'none'; phoneField.style.display = 'none'; if (captchaWidgetId !== null && typeof hcaptcha !== 'undefined') hcaptcha.reset(captchaWidgetId); }
+              if (data.user && !data.session) { showToast('Account created! Check your email for the verification link to log in.', 'success'); isLoginMode = true; submitBtn.querySelector('.btn-text').textContent = 'Sign In'; toggleText.textContent = "Don't have an account?"; toggleLink.textContent = 'Sign Up'; confirmField.style.display = 'none'; phoneField.style.display = 'none'; }
             }
-          } catch (error) { showToast(error.message, 'error'); if (captchaWidgetId !== null && typeof hcaptcha !== 'undefined') hcaptcha.reset(captchaWidgetId); } 
+          } catch (error) { showToast(error.message, 'error'); } 
           finally { submitBtn.classList.remove('loading'); }
         };
       }
@@ -357,10 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
         googleBtn.onclick = async () => {
           const termsCheck = document.getElementById('terms-check');
           if (!termsCheck || !termsCheck.checked) { showToast('You must agree to the Terms of Service to continue.', 'error'); return; }
-          let captchaToken = null;
-          if (captchaWidgetId !== null && typeof hcaptcha !== 'undefined') captchaToken = hcaptcha.getResponse(captchaWidgetId);
-          if (!captchaToken) { showToast('Please complete the security check.', 'error'); return; }
-          await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin, captchaToken } });
+          await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
         };
       }
     }
@@ -726,55 +708,4 @@ document.addEventListener('DOMContentLoaded', () => {
         const dbState = await fetchDB();
         if (dbState) {
           db = { ...getDefaultDB(), ...dbState };
-          if(!db.user) db.user = {};
-          db.user.name = db.user.name || sessionUser.user_metadata?.full_name || sessionUser.email;
-          db.user.email = sessionUser.email;
-          db.user.avatar = db.user.avatar || sessionUser.user_metadata?.avatar_url;
-          db.user.phone = db.user.phone || sessionUser.user_metadata?.phone || '';
-        } else {
-          db = getDefaultDB();
-          db.user = { name: sessionUser.user_metadata?.full_name || sessionUser.email || 'New User', email: sessionUser.email, avatar: sessionUser.user_metadata?.avatar_url || '', role: 'Mission Director', hobbies: [], phone: sessionUser.user_metadata?.phone || '', organization: '', joinedDate: new Date().toLocaleDateString() };
-          db.onboardingComplete = false;
-          await save();
-        }
-        applyTheme(db.theme || 'blue');
-        setupRealtime();
-      }
-      const initLoader = document.getElementById('init-loader');
-      if(initLoader) initLoader.style.display = 'none';
-      renderApp();
-    })();
-
-    sb.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        if (sessionUser && sessionUser.id === session.user.id) return;
-        sessionUser = session.user;
-        updateUrlUID(sessionUser.id);
-        const dbState = await fetchDB();
-        if (dbState) {
-          db = { ...getDefaultDB(), ...dbState };
-          if(!db.user) db.user = {};
-          db.user.name = db.user.name || sessionUser.user_metadata?.full_name || sessionUser.email;
-          db.user.email = sessionUser.email;
-          db.user.avatar = db.user.avatar || sessionUser.user_metadata?.avatar_url;
-          db.user.phone = db.user.phone || sessionUser.user_metadata?.phone || '';
-        } else {
-          db = getDefaultDB();
-          db.user = { name: sessionUser.user_metadata?.full_name || sessionUser.email || 'New User', email: sessionUser.email, avatar: sessionUser.user_metadata?.avatar_url || '', role: 'Mission Director', hobbies: [], phone: sessionUser.user_metadata?.phone || '', organization: '', joinedDate: new Date().toLocaleDateString() };
-          db.onboardingComplete = false;
-          await save();
-        }
-        applyTheme(db.theme || 'blue');
-        setupRealtime();
-        renderApp();
-      } else if (event === 'SIGNED_OUT') {
-        if (realtimeChannel) sb.removeChannel(realtimeChannel);
-        sessionUser = null;
-        db = getDefaultDB();
-        updateUrlUID(null);
-        applyTheme('blue');
-        renderApp();
-      }
-    });
-
-});
+          if(!db.user) db.user =
