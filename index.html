@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>OMNIX — Intelligent Mission Management System</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<!-- Puter.js for Unlimited Free AI -->
+<script src="https://js.puter.com/v2/"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-blue">
+
+<div id="init-loader" style="position: fixed; inset: 0; background: #020617; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;">
+  <img src="logo.png" style="width: 80px; height: 80px; border-radius: 50%; animation: spin 2s linear infinite; object-fit: cover;" onerror="this.style.display='none'">
+  <div style="font-family: 'JetBrains Mono'; color: #3b82f6; letter-spacing: 2px;">CONNECTING TO SECURE NETWORK...</div>
+</div>
+
+<div id="cursor-dot"></div>
+<div id="cursor-outline"></div>
+<canvas id="confetti-canvas"></canvas>
+
+<div id="command-palette" class="cmd-palette-overlay">
+    <div class="cmd-palette-box">
+        <input type="text" id="cmd-search" placeholder="Search pages or actions..." autocomplete="off">
+        <div id="cmd-results" class="cmd-results"></div>
+    </div>
+</div>
+
+<div id="app"></div>
+<div id="toast-container"></div>
+<div id="modal-container"></div>
+
+<div id="tour-overlay" class="tour-overlay">
+    <div id="tour-spotlight" class="tour-spotlight"></div>
+    <div id="tour-tooltip" class="tour-tooltip"></div>
+</div>
+
+<div id="mobile-backdrop" class="mobile-backdrop"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+</body>
+</html>
