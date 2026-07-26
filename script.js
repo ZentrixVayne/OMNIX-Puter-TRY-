@@ -491,11 +491,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function showDisclaimerModal() { modalContainer.innerHTML = `<div class="modal-overlay" onclick="if(event.target === this) closeModal()"><div class="modal-content"><div class="modal-title">⚠️ AI Generation Warning</div><div class="modal-text">You can create only 30 projects per minute. AI token usage is strictly capped (Max 500 tokens). Do you wish to continue?</div><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary-sm" onclick="generateAIPlan()">Continue</button></div></div></div>`; }
 
     window.generateAIPlan = async function() {
-      const detailsEl = document.getElementById('m-details'); if(!detailsEl) return; const details = detailsEl.value; 
-      const name = document.getElementById('m-name').value || details.split('.')[0].substring(0, 40) + '...';
-      const objective = document.getElementById('m-objective').value || 'Not specified';
+      const detailsEl = document.getElementById('m-details'); 
+      if(!detailsEl) return; 
+      const details = detailsEl.value; 
+      
+      const nameEl = document.getElementById('m-name');
+      const name = (nameEl && nameEl.value) ? nameEl.value : (details ? details.split('.')[0].substring(0, 40) + '...' : 'New Mission');
+      
+      const objEl = document.getElementById('m-objective');
+      const objective = (objEl && objEl.value) ? objEl.value : 'Not specified';
+      
       if(!details) { showToast('Please enter project details', 'error'); closeModal(); return; }
       modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content"><div class="loader"></div><div class="modal-title">Generating Plan...</div><div class="modal-text">Puter.js AI is analyzing requirements and structuring Mission DNA.</div></div></div>`;
+      
       let plan = null, dna = null, budget = 50000;
       try {
         const hobbyString = db.user?.hobbies && db.user.hobbies.length > 0 ? `\nUser Interests: ${db.user.hobbies.join(', ')}. Tailor the business ideas to align with these interests if possible.` : '';
@@ -506,7 +514,16 @@ document.addEventListener('DOMContentLoaded', () => {
             { role: "user", content: finalDetails }
         ]);
         
-        let rawContent = response?.message?.content || response?.text || JSON.stringify(response);
+        let rawContent = "";
+        if (typeof response === 'string') rawContent = response;
+        else if (response?.message?.content) {
+            rawContent = Array.isArray(response.message.content) ? response.message.content[0].text : response.message.content;
+        } else if (response?.text) {
+            rawContent = response.text;
+        } else {
+            rawContent = JSON.stringify(response);
+        }
+        
         const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
@@ -519,9 +536,33 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!plan) { plan = [ { title: "Phase 1: Research & Discovery", tasks: [{text: "Analyze market requirements", done: false, assignedTo: null, note: ''}, {text: "Identify key competitors", done: false, assignedTo: null, note: ''}] }, { title: "Phase 2: Strategy & Planning", tasks: [{text: "Develop go-to-market strategy", done: false, assignedTo: null, note: ''}, {text: "Allocate budget resources", done: false, assignedTo: null, note: ''}] }, { title: "Phase 3: Execution", tasks: [{text: "Launch initial prototype", done: false, assignedTo: null, note: ''}, {text: "Execute marketing campaign", done: false, assignedTo: null, note: ''}] }, { title: "Phase 4: Verification & Launch", tasks: [{text: "Quality assurance testing", done: false, assignedTo: null, note: ''}, {text: "Official public launch", done: false, assignedTo: null, note: ''}] } ]; }
       if (!dna) { dna = { constraints: "Strict budget limit of $50k.\nMust launch by Q3 2024.", skills: "Digital Marketing\nSupply Chain Management", risks: "Competitor undercutting prices.\nSupply chain delays." }; }
 
+      const priEl = document.getElementById('m-pri');
+      const dateEl = document.getElementById('m-date');
+      
       const newId = 'MX-' + (4472 + db.missions.length);
-      const newMission = { id: newId, name: name, objective: objective, description: details, status: 'Active', progress: 0, phase: 'Planning', priority: document.getElementById('m-pri').value, deadline: document.getElementById('m-date').value || '2024-12-31', plan: plan, dna: dna, report: null, budget: budget, budgetUsed: 0, advisor: null };
-      db.missions.unshift(newMission); save(); addLog(`Mission ${newId} created successfully. Budget allocated: $${budget.toLocaleString()}`); closeModal(); showToast('Mission plan generated successfully!', 'success'); openProject(newId);
+      const newMission = { 
+          id: newId, 
+          name: name, 
+          objective: objective, 
+          description: details, 
+          status: 'Active', 
+          progress: 0, 
+          phase: 'Planning', 
+          priority: (priEl && priEl.value) ? priEl.value : 'HIGH', 
+          deadline: (dateEl && dateEl.value) ? dateEl.value : '2024-12-31', 
+          plan: plan, 
+          dna: dna, 
+          report: null, 
+          budget: budget, 
+          budgetUsed: 0, 
+          advisor: null 
+      };
+      db.missions.unshift(newMission); 
+      save(); 
+      addLog(`Mission ${newId} created successfully. Budget allocated: $${budget.toLocaleString()}`); 
+      closeModal(); 
+      showToast('Mission plan generated successfully!', 'success'); 
+      openProject(newId);
     };
 
     // ==========================================
@@ -598,7 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <div class="card">
           <div class="card-header"><div class="card-title">AI GENERATED MISSION PLAN</div><div class="badge badge-low">Drag & Drop to Reorder</div></div>
-          ${m.plan && m.plan.length > 0 ? m.plan.map((phase, pi) => `<div style="margin-bottom: 24px;"><div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;"><h3 style="font-size: 16px; color: var(--accent);" id="phase-title-${pi}">${phase.title}</h3><button class="edit-btn" onclick="editPhaseTitle(${pi}, this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3.z"/></svg></button></div>${phase.tasks.map((task, ti) => `<div class="mission-plan-item ${task.done ? 'task-done' : ''}" draggable="true" ondragstart="dragStart(event, ${pi}, ${ti})" ondragover="dragOver(event)" ondrop="drop(event, ${pi}, ${ti})" ondragend="dragEnd()"><div class="task-grip">${icons.grip}</div><div class="task-content-wrapper"><div class="task-content" id="task-${pi}-${ti}">${task.text}</div><input type="text" class="task-note-input" placeholder="Add verification note..." value="${task.note || ''}" onchange="updateTaskNote(${pi}, ${ti}, this.value)"></div><select class="field-input" style="width: 140px; height: 36px; font-size: 12px; padding: 0 30px 0 10px; background-color: var(--input-bg);" onchange="assignWorker(${pi}, ${ti}, this.value)"><option value="">Assign...</option>${db.workers.map(w => `<option value="${w.id}" ${task.assignedTo === w.id ? 'selected' : ''}>${w.name}</option>`).join('')}</select><button class="regen-btn" onclick="regenerateTask(${pi}, ${ti})" title="Regenerate Task">${icons.regen}</button><button class="edit-btn" onclick="editTask(${pi}, ${ti}, this)" title="Edit Task"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3.z"/></svg></button>${task.done ? `<button class="btn btn-danger btn-xs" onclick="toggleTaskStatus(${pi}, ${ti})">Undo</button>` : `<button class="btn btn-success btn-xs" onclick="toggleTaskStatus(${pi}, ${ti})">Done</button>`}</div>`).join('')}</div>`).join('') : '<div>No AI plan generated. Manual mission.</div>'}
+          ${m.plan && m.plan.length > 0 ? m.plan.map((phase, pi) => `<div style="margin-bottom: 24px;"><div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;"><h3 style="font-size: 16px; color: var(--accent);" id="phase-title-${pi}">${phase.title}</h3><button class="edit-btn" onclick="editPhaseTitle(${pi}, this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z"/></svg></button></div>${phase.tasks.map((task, ti) => `<div class="mission-plan-item ${task.done ? 'task-done' : ''}" draggable="true" ondragstart="dragStart(event, ${pi}, ${ti})" ondragover="dragOver(event)" ondrop="drop(event, ${pi}, ${ti})" ondragend="dragEnd()"><div class="task-grip">${icons.grip}</div><div class="task-content-wrapper"><div class="task-content" id="task-${pi}-${ti}">${task.text}</div><input type="text" class="task-note-input" placeholder="Add verification note..." value="${task.note || ''}" onchange="updateTaskNote(${pi}, ${ti}, this.value)"></div><select class="field-input" style="width: 140px; height: 36px; font-size: 12px; padding: 0 30px 0 10px; background-color: var(--input-bg);" onchange="assignWorker(${pi}, ${ti}, this.value)"><option value="">Assign...</option>${db.workers.map(w => `<option value="${w.id}" ${task.assignedTo === w.id ? 'selected' : ''}>${w.name}</option>`).join('')}</select><button class="regen-btn" onclick="regenerateTask(${pi}, ${ti})" title="Regenerate Task">${icons.regen}</button><button class="edit-btn" onclick="editTask(${pi}, ${ti}, this)" title="Edit Task"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z"/></svg></button>${task.done ? `<button class="btn btn-danger btn-xs" onclick="toggleTaskStatus(${pi}, ${ti})">Undo</button>` : `<button class="btn btn-success btn-xs" onclick="toggleTaskStatus(${pi}, ${ti})">Done</button>`}</div>`).join('')}</div>`).join('') : '<div>No AI plan generated. Manual mission.</div>'}
         </div>
       `;
     }
@@ -618,7 +659,9 @@ document.addEventListener('DOMContentLoaded', () => {
             { role: "system", content: "Rewrite this project task to be more actionable and professional. Output only the task text." },
             { role: "user", content: newTaskText }
         ]);
-        newTaskText = response?.message?.content || response?.text || newTaskText;
+        if (typeof response === 'string') newTaskText = response;
+        else if (response?.message?.content) newTaskText = Array.isArray(response.message.content) ? response.message.content[0].text : response.message.content;
+        else if (response?.text) newTaskText = response.text;
       } catch (e) { console.warn("Regenerate failed, using fallback."); } 
       m.plan[pi].tasks[ti].text = newTaskText; save(); renderRouteContent(); showToast('Task regenerated!', 'success'); 
     };
@@ -633,7 +676,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 { role: "system", content: "Analyze this mission and provide risk and recommendations. Output STRICTLY valid JSON. Format: {\"risk_level\":\"Medium\",\"reason\":\"Short reason\",\"recommendation\":\"Short action\"}" },
                 { role: "user", content: `Mission Name: ${m.name}\nDetails: ${m.description}\nDNA: ${JSON.stringify(m.dna)}` }
             ]);
-            let rawContent = response?.message?.content || response?.text || JSON.stringify(response);
+            
+            let rawContent = "";
+            if (typeof response === 'string') rawContent = response;
+            else if (response?.message?.content) rawContent = Array.isArray(response.message.content) ? response.message.content[0].text : response.message.content;
+            else if (response?.text) rawContent = response.text;
+            else rawContent = JSON.stringify(response);
+
             const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 const advisor = JSON.parse(jsonMatch[0]);
@@ -667,7 +716,9 @@ document.addEventListener('DOMContentLoaded', () => {
             { role: "system", content: "You are a mission reporting AI. Generate a brief 2-paragraph final report summarizing the success and recommendations. Plain text only." },
             { role: "user", content: `Mission Name: ${m.name}\nDetails: ${m.description}` }
         ]);
-        report = response?.message?.content || response?.text || null;
+        if (typeof response === 'string') report = response;
+        else if (response?.message?.content) report = Array.isArray(response.message.content) ? response.message.content[0].text : response.message.content;
+        else if (response?.text) report = response.text;
       } catch (e) { console.warn("AI call failed. Using fallback report."); } 
       if (!report) { report = "Mission completed successfully. All phases were executed within the defined constraints. Deliverables match the required quality standards. Recommendation: Archive project and proceed to next strategic objective."; } 
       m.report = report; save(); addLog(`Final report generated for ${m.id}.`); closeModal(); renderRouteContent(); showToast('Final report generated!', 'success'); 
@@ -705,24 +756,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // INITIALIZATION
     // ==========================================
     async function init() {
-      // Hide the initial loader once DOM is ready
       const initLoader = document.getElementById('init-loader');
       try { if (initLoader) setTimeout(() => { initLoader.style.opacity = '0'; setTimeout(() => initLoader.remove(), 500); }, 600); } catch (e) {}
 
-      // Restore existing session
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
         sessionUser = session.user;
         updateUrlUID(sessionUser.id);
 
-        // Load saved DB state
         const dbState = await fetchDB();
         if (dbState) {
           db = { ...getDefaultDB(), ...dbState };
           if (!db.user) db.user = {};
           db.user.name = db.user.name || sessionUser?.user_metadata?.full_name || sessionUser?.email || 'User';
         } else {
-          // First time login: seed minimal user object
           db.user = {
             name: sessionUser?.user_metadata?.full_name || sessionUser?.email || 'User',
             avatar: sessionUser?.user_metadata?.avatar_url || '',
@@ -734,20 +781,16 @@ document.addEventListener('DOMContentLoaded', () => {
           db.onboardingComplete = false;
         }
 
-        // Apply theme & realtime
         applyTheme(db.theme || 'blue');
         setupRealtime();
       } else {
-        // No session: ensure default DB and theme
         applyTheme('blue');
       }
 
-      // Listen for auth state changes (login / logout / OAuth redirect)
       sb.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN' && session) {
           sessionUser = session.user;
           updateUrlUID(sessionUser.id);
-          // Load DB for this user
           (async () => {
             const state = await fetchDB();
             if (state) {
@@ -779,11 +822,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      // First render
       renderApp();
     }
 
-    // Kick it off
     init().catch(err => console.error("OMNIX Init Error:", err));
 
 }); // <-- closes DOMContentLoaded listener
