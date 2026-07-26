@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdweGtueHppZ25jZHB2eGlzb2FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4ODg4NDQsImV4cCI6MjEwMDQ2NDg0NH0.ftVXt9kTUneeuOZnXAdL2wyDp56ZYdg5wzDl7tuRfuU';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // Silence the Puter.js welcome banner
+    try { if (window.puter) puter.quiet = true; } catch (e) {}
+
     const LOGO_URL = 'logo.png';
     let realtimeChannel = null;
     let tourStep = 0;
@@ -41,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ONBOARDING TOUR LOGIC
     // ==========================================
     const tourSteps = [
-        { selector: null, title: "Welcome to OMNIX", text: "Welcome, Director. I am your OMNIX Guide. I’ll walk you through your new Mission Control. Let's start by exploring the interface.", position: "center" },
+        { selector: null, title: "Welcome to OMNIX", text: "Welcome, Director. I am your OMNIX Guide. I'll walk you through your new Mission Control. Let's start by exploring the interface.", position: "center" },
         { selector: "#search-bar-trigger", title: "Command Palette", text: "Press Ctrl+K or click here to instantly search for pages, missions, or actions. Your central command hub.", position: "bottom" },
         { selector: "button[onclick*=\"navigate('create'\"]", title: "Create Mission", text: "Click here to define your mission. The AI will analyze your parameters, extract the Mission DNA, and build a structured task plan.", position: "left" },
         { selector: ".nav-item[data-route='workers']", title: "Digital Workforce", text: "Meet your autonomous digital workers (ATLAS, ECHO, NOVA). Once your mission is generated, assign tasks to them and watch them execute.", position: "right" },
@@ -350,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // TERMS OF SERVICE MODAL
     // ==========================================
-    window.openTermsModal = function() { modalContainer.innerHTML = `<div class="modal-overlay" onclick="if(event.target === this) closeModal()"><div class="modal-content" style="max-width: 600px; text-align: left; max-height: 80vh; display: flex; flex-direction: column;"><div class="modal-title" style="text-align: center; margin-bottom: 20px;">Terms of Service & Privacy Policy</div><div style="overflow-y: auto; padding-right: 15px; font-size: 13px; color: var(--text-dim); line-height: 1.6; margin-bottom: 24px; flex-grow: 1;"><p><strong>1. ACCEPTANCE OF TERMS</strong><br>Welcome to the OMNIX Intelligent Mission Management System ("OMNIX", "Service", "Platform"). By accessing or using the Service, you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you are expressly prohibited from using the Service and must discontinue use immediately.</p><br><p><strong>2. USER RESPONSIBILITIES AND CONDUCT</strong><br>You are solely responsible for all content, data, and mission parameters ("User Data") you input into OMNIX. You agree not to use the Service to:<br>a) Violate any applicable local, national, or international law or regulation.<br>b) Infringe upon the intellectual property rights, privacy, or other rights of any third party.<br>c) Upload or transmit viruses, malware, or any other malicious code.<br>d) Attempt to gain unauthorized access to, interfere with, or disrupt the Service, its servers, or networks.<br>e) Use the Service for any illegal, harmful, fraudulent, infringing, or tortious purposes.</p><br><p><strong>3. DATA PRIVACY AND COLLECTION</strong><br>Your privacy is critical to us. OMNIX utilizes third-party service providers including Supabase (for Authentication and Database management) and Puter.js (for AI model processing).<br>a) Authentication Data: When you log in via Email/Password or Google OAuth, your authentication tokens and identifiers are securely managed by Supabase Auth.<br>b) Profile Data: Information such as your name, role, selected hobbies, and profile picture are stored to personalize your experience.<br>c) Mission Data: All missions, project plans, DNA breakdowns, and tasks you create are securely stored in the Supabase database linked exclusively to your unique User ID.<br>d) AI Processing: When you generate mission plans or regenerate tasks, your input data is sent to Puter.js for processing. We do not store your prompts on Puter's servers beyond the temporary processing time required to generate your response.</p><br><p><strong>4. AI INTEGRATION AND LIMITATIONS</strong><br>OMNIX integrates artificial intelligence (LLaMA 3.3 via Puter.js) to generate project plans and mission DNA. You acknowledge that:<br>a) AI-generated content may contain errors, inaccuracies, or incomplete information.<br>b) AI outputs should not be relied upon as professional, legal, financial, or medical advice.<br>c) The Service enforces strict token limits (e.g., 500 tokens per plan generation, 250 tokens per report) to manage AI rate limits.<br>d) You are responsible for reviewing, verifying, and approving all AI-generated tasks and phases before execution.</p><br><p><strong>5. INTELLECTUAL PROPERTY RIGHTS</strong><br>The OMNIX platform, including its original source code, UI/UX design, and underlying architecture, is the intellectual property of the developers (Arshman Anil & Jaweria Irfan). You retain all rights to your User Data. By using the Service, you grant OMNIX a limited license to process your User Data strictly for the purpose of providing and improving the Service.</p><br><p><strong>6. LIMITATION OF LIABILITY</strong><br>OMNIX and its developers shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from:<br>a) Your access to or use of, or inability to access or use, the Service.<br>b) Any conduct or content of any third party on the Service.<br>c) Any unauthorized access, use, or alteration of your transmissions or content.<br>d) The AI's inability to generate a successful or relevant mission plan.</p><br><p><strong>7. TERMINATION</strong><br>We may terminate or suspend your access to our Service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms. Upon termination, your right to use the Service will cease immediately. You may request deletion of your account and associated data at any time by contacting support.</p><br><p><strong>8. CHANGES TO TERMS</strong><br>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.</p><br><p><strong>9. CONTACT INFORMATION</strong><br>If you have any questions about these Terms, please contact our enterprise support team at support@omnix.io.</p></div><div class="modal-actions" style="justify-content: center; margin-top: auto;"><button class="btn" onclick="declineTerms()">Decline</button><button class="btn btn-primary-sm" onclick="acceptTerms()">I Agree</button></div></div></div>`; };
+    window.openTermsModal = function() { modalContainer.innerHTML = `<div class="modal-overlay" onclick="if(event.target === this) closeModal()"><div class="modal-content" style="max-width: 600px; text-align: left; max-height: 80vh; display: flex; flex-direction: column;"><div class="modal-title" style="text-align: center; margin-bottom: 20px;">Terms of Service & Privacy Policy</div><div style="overflow-y: auto; padding-right: 15px; font-size: 13px; color: var(--text-dim); line-height: 1.6; margin-bottom: 24px; flex-grow: 1;"><p><strong>1. ACCEPTANCE OF TERMS</strong><br>Welcome to the OMNIX Intelligent Mission Management System. By accessing or using the Service, you agree to be bound by these Terms of Service.</p><br><p><strong>2. USER RESPONSIBILITIES</strong><br>You are solely responsible for all content and data you input into OMNIX. You agree not to use the Service to violate any law or infringe on third-party rights.</p><br><p><strong>3. DATA PRIVACY</strong><br>OMNIX utilizes Supabase for authentication/database and Puter.js for AI processing. Your mission data is securely stored linked to your unique User ID.</p><br><p><strong>4. AI INTEGRATION</strong><br>AI-generated content may contain errors. Outputs should not be relied upon as professional advice. You are responsible for reviewing all AI-generated tasks.</p><br><p><strong>5. INTELLECTUAL PROPERTY</strong><br>The OMNIX platform is the intellectual property of its developers (Arshman Anil & Jaweria Irfan). You retain all rights to your User Data.</p><br><p><strong>6. LIMITATION OF LIABILITY</strong><br>OMNIX shall not be liable for indirect, incidental, or consequential damages resulting from use of the Service.</p><br><p><strong>7. CONTACT</strong><br>For questions about these Terms, contact support@omnix.io.</p></div><div class="modal-actions" style="justify-content: center; margin-top: auto;"><button class="btn" onclick="declineTerms()">Decline</button><button class="btn btn-primary-sm" onclick="acceptTerms()">I Agree</button></div></div></div>`; };
     window.acceptTerms = function() { const check = document.getElementById('terms-check'); if (check) check.checked = true; closeModal(); showToast('You have accepted the Terms of Service.', 'success'); };
     window.declineTerms = function() { const check = document.getElementById('terms-check'); if (check) check.checked = false; closeModal(); showToast('You declined the Terms of Service.', 'info'); };
     window.closeModal = function() { modalContainer.innerHTML = ''; };
@@ -498,7 +501,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const hobbyString = db.user?.hobbies && db.user.hobbies.length > 0 ? `\nUser Interests: ${db.user.hobbies.join(', ')}. Tailor the business ideas to align with these interests if possible.` : '';
         const finalDetails = `Mission Title: ${name}\nObjective: ${objective}\nDetails: ${details}${hobbyString}`;
         
-        // Puter.js AI Call
         const response = await puter.ai.chat([
             { role: "system", content: "You are a mission planning AI. Generate a concise 4-phase project plan AND a Mission DNA breakdown. Output STRICTLY valid JSON. No markdown. Format: {\"phases\":[{\"title\":\"Phase 1: ...\",\"tasks\":[\"Task 1\",\"Task 2\"]}],\"dna\":{\"constraints\":\"Short string\",\"skills\":\"Short string\",\"risks\":\"Short string\",\"budget\":50000}}" },
             { role: "user", content: finalDetails }
@@ -534,7 +536,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (displayProgress === 100 && m.status !== 'Completed') { m.status = 'Completed'; m.phase = 'Completed'; launchConfetti(); addLog(`Mission ${m.id} reached 100% completion!`); }
       const budgetUsed = m.budgetUsed || 0; const budgetTotal = m.budget || 50000; const budgetPercent = budgetTotal > 0 ? ((budgetUsed / budgetTotal) * 100).toFixed(1) : 0;
 
-      // Timeline Logic
       const steps = [
         { name: 'Planning', phase: 'Planning' },
         { name: 'Approval', phase: 'Approval' },
@@ -681,7 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showToast = function(message, type = 'info') { const container = document.getElementById('toast-container'); if(!container) return; const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.textContent = message; container.appendChild(toast); setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(120%)'; setTimeout(() => toast.remove(), 300); }, 3000); };
 
     // ==========================================
-    // SUPABASE REALTIME & INIT
+    // SUPABASE REALTIME
     // ==========================================
     function setupRealtime() {
       if (realtimeChannel) sb.removeChannel(realtimeChannel);
@@ -700,12 +701,89 @@ document.addEventListener('DOMContentLoaded', () => {
         .subscribe();
     }
 
-    (async () => {
+    // ==========================================
+    // INITIALIZATION
+    // ==========================================
+    async function init() {
+      // Hide the initial loader once DOM is ready
+      const initLoader = document.getElementById('init-loader');
+      try { if (initLoader) setTimeout(() => { initLoader.style.opacity = '0'; setTimeout(() => initLoader.remove(), 500); }, 600); } catch (e) {}
+
+      // Restore existing session
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
         sessionUser = session.user;
         updateUrlUID(sessionUser.id);
+
+        // Load saved DB state
         const dbState = await fetchDB();
         if (dbState) {
           db = { ...getDefaultDB(), ...dbState };
-          if(!db.user) db.user =
+          if (!db.user) db.user = {};
+          db.user.name = db.user.name || sessionUser?.user_metadata?.full_name || sessionUser?.email || 'User';
+        } else {
+          // First time login: seed minimal user object
+          db.user = {
+            name: sessionUser?.user_metadata?.full_name || sessionUser?.email || 'User',
+            avatar: sessionUser?.user_metadata?.avatar_url || '',
+            role: 'Mission Director',
+            organization: '',
+            hobbies: [],
+            joinedDate: new Date().toLocaleDateString()
+          };
+          db.onboardingComplete = false;
+        }
+
+        // Apply theme & realtime
+        applyTheme(db.theme || 'blue');
+        setupRealtime();
+      } else {
+        // No session: ensure default DB and theme
+        applyTheme('blue');
+      }
+
+      // Listen for auth state changes (login / logout / OAuth redirect)
+      sb.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          sessionUser = session.user;
+          updateUrlUID(sessionUser.id);
+          // Load DB for this user
+          (async () => {
+            const state = await fetchDB();
+            if (state) {
+              db = { ...getDefaultDB(), ...state };
+              if (!db.user) db.user = {};
+              db.user.name = db.user.name || sessionUser?.user_metadata?.full_name || sessionUser?.email || 'User';
+            } else {
+              db.user = {
+                name: sessionUser?.user_metadata?.full_name || sessionUser?.email || 'User',
+                avatar: sessionUser?.user_metadata?.avatar_url || '',
+                role: 'Mission Director',
+                organization: '',
+                hobbies: [],
+                joinedDate: new Date().toLocaleDateString()
+              };
+              db.onboardingComplete = false;
+            }
+            applyTheme(db.theme || 'blue');
+            setupRealtime();
+            renderApp();
+          })();
+        } else if (event === 'SIGNED_OUT') {
+          sessionUser = null;
+          db = getDefaultDB();
+          if (realtimeChannel) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
+          updateUrlUID(null);
+          applyTheme('blue');
+          renderApp();
+        }
+      });
+
+      // First render
+      renderApp();
+    }
+
+    // Kick it off
+    init().catch(err => console.error("OMNIX Init Error:", err));
+
+}); // <-- closes DOMContentLoaded listener
