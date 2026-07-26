@@ -1,6 +1,8 @@
 // ==========================================
-// OMNIX CORE v36.0 (Puter.js AI + Detailed Views)
+// OMNIX CORE v36.0 (Auth Bypass Enabled)
 // ==========================================
+const BYPASS_AUTH = true; // <-- SET TO false TO RESTORE SUPABASE AUTH & CAPTCHA
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- SUPABASE INITIALIZATION ---
@@ -127,6 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchDB() {
+      if (BYPASS_AUTH) {
+        const local = localStorage.getItem('omnix_test_db');
+        return local ? JSON.parse(local) : null;
+      }
       if (!sessionUser) return null;
       const { data, error } = await sb.from('omnix_data').select('state').eq('user_id', sessionUser.id).single();
       if (data && data.state) return data.state;
@@ -134,6 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function saveDB() {
+      if (BYPASS_AUTH) {
+        localStorage.setItem('omnix_test_db', JSON.stringify(db));
+        return;
+      }
       if (!sessionUser) return;
       db.updatedAt = Date.now();
       const { error } = await sb.from('omnix_data').upsert({ user_id: sessionUser.id, state: { ...db } }, { onConflict: 'user_id' });
@@ -388,7 +398,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const searchBar = document.getElementById('search-bar-trigger');
       if (searchBar) { searchBar.onclick = () => { if (cmdPalette) { cmdPalette.classList.add('active'); if (cmdSearch) { cmdSearch.value = ''; renderCmdResults(''); cmdSearch.focus(); } } }; }
       const logoutBtn = document.getElementById('logout-btn');
-      if(logoutBtn) logoutBtn.onclick = async () => { await sb.auth.signOut(); sessionUser = null; db = getDefaultDB(); renderApp(); };
+      if(logoutBtn) logoutBtn.onclick = async () => { 
+        if(BYPASS_AUTH) {
+          localStorage.removeItem('omnix_test_db'); 
+          location.reload(); 
+          return;
+        }
+        await sb.auth.signOut(); sessionUser = null; db = getDefaultDB(); renderApp(); 
+      };
       const menuToggle = document.getElementById('menu-toggle'); const backdrop = document.getElementById('mobile-backdrop'); const sidebar = document.querySelector('.sidebar');
       if(menuToggle && backdrop && sidebar) { menuToggle.onclick = () => { sidebar.classList.add('open'); backdrop.classList.add('active'); }; backdrop.onclick = () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); }; }
     }
@@ -464,8 +481,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // REFINED USER PROFILE / ACCOUNT SETTINGS
     function viewAccountSettings() { 
-      const userName = db.user?.name || 'User'; 
-      const userEmail = sessionUser?.email || ''; 
+      const userName = db.user?.name || 'Test Director'; 
+      const userEmail = BYPASS_AUTH ? 'test@omnix.io' : (sessionUser?.email || ''); 
       const userAvatar = db.user?.avatar; 
       const userRole = db.user?.role || 'Mission Director'; 
       const userHobbies = db.user?.hobbies || []; 
@@ -756,6 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showToast = function(message, type = 'info') { const container = document.getElementById('toast-container'); if(!container) return; const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.textContent = message; container.appendChild(toast); setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(120%)'; setTimeout(() => toast.remove(), 300); }, 3000); };
 
     function setupRealtime() {
+      if (BYPASS_AUTH) return;
       if (realtimeChannel) sb.removeChannel(realtimeChannel);
       realtimeChannel = sb.channel('omnix-realtime')
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'omnix_data', filter: `user_id=eq.${sessionUser.id}` }, payload => {
@@ -775,6 +793,29 @@ document.addEventListener('DOMContentLoaded', () => {
     async function init() {
       const initLoader = document.getElementById('init-loader');
       try { if (initLoader) setTimeout(() => { initLoader.style.opacity = '0'; setTimeout(() => initLoader.remove(), 500); }, 600); } catch (e) {}
+
+      if (BYPASS_AUTH) {
+        sessionUser = { id: 'test-user-123', email: 'test@omnix.io', user_metadata: { full_name: 'Test Director', avatar_url: '' } };
+        const local = await fetchDB();
+        if (local) {
+          db = { ...getDefaultDB(), ...local };
+          if(!db.user) db.user = {};
+        } else {
+          db.user = {
+            name: 'Test Director',
+            avatar: '',
+            role: 'Mission Director',
+            organization: 'OMNIX Test Org',
+            hobbies: ['AI & ML'],
+            joinedDate: new Date().toLocaleDateString()
+          };
+          db.onboardingComplete = true;
+          save();
+        }
+        applyTheme(db.theme || 'blue');
+        renderApp();
+        return; // Skip normal supabase auth flow
+      }
 
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
